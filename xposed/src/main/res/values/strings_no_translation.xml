@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- General -->
+    <string name="key_blacklist" translatable="false">key_blacklist</string>
+    <string name="key_vibrate" translatable="false">key_vibration</string>
+</resources>

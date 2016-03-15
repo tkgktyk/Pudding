@@ -1,0 +1,12 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+        android:key="@string/key_blacklist"
+        android:title="@string/pref_title_blacklist" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/key_vibrate"
+        android:title="@string/pref_title_vibrate" />
+
+</PreferenceScreen>

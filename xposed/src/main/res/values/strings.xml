@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">Pudding</string>
+    <string name="xposed_description">Orverscroll Action</string>
+
+    <!-- App Selector -->
+    <string name="only_selected">Only selected</string>
+
+    <!-- ActionInfo -->
+    <string name="not_found">Not found</string>
+
+    <!-- Action Picker -->
+    <string name="tool">Tool</string>
+    <string name="application">Application</string>
+    <string name="shortcut">Shortcut</string>
+    <string name="none">None</string>
+
+    <!-- Action Setter -->
+    <string name="direction_top">Top</string>
+    <string name="direction_left">Left</string>
+    <string name="direction_bottom">Bottom</string>
+    <string name="direction_right">Right</string>
+
+    <!-- Actions -->
+    <!-- key -->
+    <string name="action_back">Back</string>
+    <string name="action_home">Home</string>
+    <string name="action_recents">Recents</string>
+    <string name="action_left">Left</string>
+    <string name="action_right">Right</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_move_home">Move Home</string>
+    <string name="action_move_end">Move End</string>
+    <string name="action_lock_screen">Lock Screen</string>
+    <!-- status bar -->
+    <string name="action_notifications">Notifications</string>
+    <string name="action_quick_settings">Quick Settings</string>
+    <!-- internal -->
+    <string name="action_kill">Kill App</string>
+    <string name="action_power_menu">Power Menu</string>
+
+    <!-- Strings related to Settings -->
+    <string name="saved">Saved</string>
+
+    <!-- General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_blacklist">Blacklist</string>
+    <string name="pref_description_blacklist">Ignore specified apps</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+
+    <!-- Action settings -->
+    <string name="pref_header_action">Action</string>
+    <string name="default_action">Default</string>
+
+</resources>
