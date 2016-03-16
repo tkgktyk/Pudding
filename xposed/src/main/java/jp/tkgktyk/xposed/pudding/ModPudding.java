@@ -19,7 +19,9 @@ package jp.tkgktyk.xposed.pudding;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -36,6 +38,9 @@ import jp.tkgktyk.xposed.pudding.app.util.ActionInfo;
  * Created by tkgktyk on 2015/02/13.
  */
 public class ModPudding extends XposedModule {
+    private static final String CLASS_PHONE_WINDOW = "com.android.internal.policy.impl.PhoneWindow";
+    private static final String CLASS_PHONE_WINDOW_M = "com.android.internal.policy.PhoneWindow";
+
     private static final String FIELD_SETTINGS = Pudding.NAME + "_settings";
     private static final String FIELD_PUDDING_LAYOUT = Pudding.NAME + "_puddingLayout";
 
@@ -55,7 +60,7 @@ public class ModPudding extends XposedModule {
                                 String packageName = activity.getPackageName();
                                 Context modContext = Pudding.getModContext(activity);
                                 File xml = new File(new File(modContext.getApplicationInfo().dataDir,
-                                        "shared_prefs"), packageName);
+                                        "shared_prefs"), packageName + ".xml");
                                 forActions = xml.exists() ?
                                         Pudding.getSharedPreferences(activity, packageName) :
                                         mPrefs;
@@ -163,6 +168,10 @@ public class ModPudding extends XposedModule {
                                 if (settings != null) {
                                     XposedHelpers.removeAdditionalInstanceField(activity, FIELD_SETTINGS);
                                 }
+                                ViewGroup pudding = getPuddingLayout(activity);
+                                if (pudding != null) {
+                                    XposedHelpers.removeAdditionalInstanceField(activity, FIELD_PUDDING_LAYOUT);
+                                }
                             } catch (Throwable t) {
                                 logE(t);
                             }
@@ -263,20 +272,23 @@ public class ModPudding extends XposedModule {
 //                            return puddingLayout;
 //                        }
 //                    });
-            XposedHelpers.findAndHookMethod(Activity.class, "setContentView", int.class,
+            final Class<?> classPhoneWindow = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ?
+                    XposedHelpers.findClass(CLASS_PHONE_WINDOW_M, null) :
+                    XposedHelpers.findClass(CLASS_PHONE_WINDOW, null);
+            XposedHelpers.findAndHookMethod(classPhoneWindow, "setContentView", int.class,
                     new XC_MethodReplacement() {
                         @Override
                         protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                             try {
-                                Activity activity = (Activity) methodHookParam.thisObject;
-                                Pudding.Settings settings = getSettings(activity);
+                                Context context = (Context) XposedHelpers.callMethod(methodHookParam.thisObject, "getContext");
+                                Pudding.Settings settings = getSettings(context);
                                 if (settings == null) {
                                     invokeOriginalMethod(methodHookParam);
                                 } else {
                                     int layoutRes = (Integer) methodHookParam.args[0];
-                                    View content = activity.getLayoutInflater().inflate(layoutRes, null);
-                                    View pudding = install(activity, content, settings, null);
-                                    activity.setContentView(pudding, pudding.getLayoutParams());
+                                    View content = LayoutInflater.from(context).inflate(layoutRes, null);
+                                    View pudding = install(context, content, settings, null);
+                                    XposedHelpers.callMethod(methodHookParam.thisObject, "setContentView", pudding, pudding.getLayoutParams());
                                 }
                             } catch (Throwable t) {
                                 logE(t);
@@ -285,19 +297,19 @@ public class ModPudding extends XposedModule {
                             return null;
                         }
                     });
-            XposedHelpers.findAndHookMethod(Activity.class, "setContentView", View.class,
+            XposedHelpers.findAndHookMethod(classPhoneWindow, "setContentView", View.class,
                     new XC_MethodReplacement() {
                         @Override
                         protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                             try {
-                                Activity activity = (Activity) methodHookParam.thisObject;
-                                Pudding.Settings settings = getSettings(activity);
+                                Context context = (Context) XposedHelpers.callMethod(methodHookParam.thisObject, "getContext");
+                                Pudding.Settings settings = getSettings(context);
                                 if (settings == null) {
                                     invokeOriginalMethod(methodHookParam);
                                 } else {
                                     View content = (View) methodHookParam.args[0];
-                                    View pudding = install(activity, content, settings, null);
-                                    activity.setContentView(pudding, pudding.getLayoutParams());
+                                    View pudding = install(context, content, settings, null);
+                                    XposedHelpers.callMethod(methodHookParam.thisObject, "setContentView", pudding, pudding.getLayoutParams());
                                 }
                             } catch (Throwable t) {
                                 logE(t);
@@ -306,24 +318,24 @@ public class ModPudding extends XposedModule {
                             return null;
                         }
                     });
-            XposedHelpers.findAndHookMethod(Activity.class, "setContentView", View.class,
+            XposedHelpers.findAndHookMethod(classPhoneWindow, "setContentView", View.class,
                     ViewGroup.LayoutParams.class, new XC_MethodReplacement() {
                         @Override
                         protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                             try {
-                                Activity activity = (Activity) methodHookParam.thisObject;
+                                Context context = (Context) XposedHelpers.callMethod(methodHookParam.thisObject, "getContext");
                                 View content = (View) methodHookParam.args[0];
                                 if (content instanceof PuddingLayout) {
                                     invokeOriginalMethod(methodHookParam);
                                 } else {
-                                    Pudding.Settings settings = getSettings(activity);
+                                    Pudding.Settings settings = getSettings(context);
                                     if (settings == null) {
                                         invokeOriginalMethod(methodHookParam);
                                     } else {
-                                        View pudding = install(activity, content, settings, null);
                                         ViewGroup.LayoutParams lp
                                                 = (ViewGroup.LayoutParams) methodHookParam.args[1];
-                                        activity.setContentView(pudding, lp);
+                                        View pudding = install(context, content, settings, lp);
+                                        XposedHelpers.callMethod(methodHookParam.thisObject, "setContentView", pudding, pudding.getLayoutParams());
                                     }
                                 }
                             } catch (Throwable t) {
@@ -333,22 +345,22 @@ public class ModPudding extends XposedModule {
                             return null;
                         }
                     });
-            XposedHelpers.findAndHookMethod(Activity.class, "addContentView", View.class,
+            XposedHelpers.findAndHookMethod(classPhoneWindow, "addContentView", View.class,
                     ViewGroup.LayoutParams.class, new XC_MethodReplacement() {
                         @Override
                         protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                             try {
-                                Activity activity = (Activity) methodHookParam.thisObject;
-                                Pudding.Settings settings = getSettings(activity);
+                                Context context = (Context) XposedHelpers.callMethod(methodHookParam.thisObject, "getContext");
+                                Pudding.Settings settings = getSettings(context);
                                 if (settings == null) {
                                     invokeOriginalMethod(methodHookParam);
                                 } else {
                                     View content = (View) methodHookParam.args[0];
                                     ViewGroup.LayoutParams lp
                                             = (ViewGroup.LayoutParams) methodHookParam.args[1];
-                                    ViewGroup pudding = getPuddingLayout(activity);
+                                    ViewGroup pudding = getPuddingLayout(context);
                                     if (pudding == null) {
-                                        pudding = install(activity, content, settings, lp);
+                                        pudding = install(context, content, settings, lp);
                                     } else {
                                         pudding.addView(content, lp);
                                     }
@@ -360,6 +372,107 @@ public class ModPudding extends XposedModule {
                             return null;
                         }
                     });
+//            XposedHelpers.findAndHookMethod(Activity.class, "setContentView", int.class,
+//                    new XC_MethodReplacement() {
+//                        @Override
+//                        protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+//                            try {
+//                                logD("setContentView");
+//                                Activity activity = (Activity) methodHookParam.thisObject;
+//                                Pudding.Settings settings = getSettings(activity);
+//                                if (settings == null) {
+//                                    invokeOriginalMethod(methodHookParam);
+//                                } else {
+//                                    int layoutRes = (Integer) methodHookParam.args[0];
+//                                    View content = activity.getLayoutInflater().inflate(layoutRes, null);
+//                                    View pudding = install(activity, content, settings, null);
+//                                    activity.setContentView(pudding, pudding.getLayoutParams());
+//                                }
+//                            } catch (Throwable t) {
+//                                logE(t);
+//                                invokeOriginalMethod(methodHookParam);
+//                            }
+//                            return null;
+//                        }
+//                    });
+//            XposedHelpers.findAndHookMethod(Activity.class, "setContentView", View.class,
+//                    new XC_MethodReplacement() {
+//                        @Override
+//                        protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+//                            try {
+//                                logD("setContentView");
+//                                Activity activity = (Activity) methodHookParam.thisObject;
+//                                Pudding.Settings settings = getSettings(activity);
+//                                if (settings == null) {
+//                                    invokeOriginalMethod(methodHookParam);
+//                                } else {
+//                                    View content = (View) methodHookParam.args[0];
+//                                    View pudding = install(activity, content, settings, null);
+//                                    activity.setContentView(pudding, pudding.getLayoutParams());
+//                                }
+//                            } catch (Throwable t) {
+//                                logE(t);
+//                                invokeOriginalMethod(methodHookParam);
+//                            }
+//                            return null;
+//                        }
+//                    });
+//            XposedHelpers.findAndHookMethod(Activity.class, "setContentView", View.class,
+//                    ViewGroup.LayoutParams.class, new XC_MethodReplacement() {
+//                        @Override
+//                        protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+//                            try {
+//                                logD("setContentView");
+//                                Activity activity = (Activity) methodHookParam.thisObject;
+//                                View content = (View) methodHookParam.args[0];
+//                                if (content instanceof PuddingLayout) {
+//                                    invokeOriginalMethod(methodHookParam);
+//                                } else {
+//                                    Pudding.Settings settings = getSettings(activity);
+//                                    if (settings == null) {
+//                                        invokeOriginalMethod(methodHookParam);
+//                                    } else {
+//                                        View pudding = install(activity, content, settings, null);
+//                                        ViewGroup.LayoutParams lp
+//                                                = (ViewGroup.LayoutParams) methodHookParam.args[1];
+//                                        activity.setContentView(pudding, lp);
+//                                    }
+//                                }
+//                            } catch (Throwable t) {
+//                                logE(t);
+//                                invokeOriginalMethod(methodHookParam);
+//                            }
+//                            return null;
+//                        }
+//                    });
+//            XposedHelpers.findAndHookMethod(Activity.class, "addContentView", View.class,
+//                    ViewGroup.LayoutParams.class, new XC_MethodReplacement() {
+//                        @Override
+//                        protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+//                            try {
+//                                logD("addContentView");
+//                                Activity activity = (Activity) methodHookParam.thisObject;
+//                                Pudding.Settings settings = getSettings(activity);
+//                                if (settings == null) {
+//                                    invokeOriginalMethod(methodHookParam);
+//                                } else {
+//                                    View content = (View) methodHookParam.args[0];
+//                                    ViewGroup.LayoutParams lp
+//                                            = (ViewGroup.LayoutParams) methodHookParam.args[1];
+//                                    ViewGroup pudding = getPuddingLayout(activity);
+//                                    if (pudding == null) {
+//                                        pudding = install(activity, content, settings, lp);
+//                                    } else {
+//                                        pudding.addView(content, lp);
+//                                    }
+//                                }
+//                            } catch (Throwable t) {
+//                                logE(t);
+//                                invokeOriginalMethod(methodHookParam);
+//                            }
+//                            return null;
+//                        }
+//                    });
         } catch (Throwable t) {
             logE(t);
         }
@@ -373,59 +486,59 @@ public class ModPudding extends XposedModule {
         return (PuddingLayout) XposedHelpers.getAdditionalInstanceField(object, FIELD_PUDDING_LAYOUT);
     }
 
-    private static PuddingLayout install(Activity activity, View content,
+    private static PuddingLayout install(Context context, View content,
                                          Pudding.Settings settings, ViewGroup.LayoutParams lp) {
-        PuddingLayout puddingLayout = generatePudding(activity, settings);
+        PuddingLayout puddingLayout = generatePudding(context, settings);
         if (lp != null) {
             puddingLayout.addView(content, lp);
         } else {
             puddingLayout.addView(content);
         }
-        XposedHelpers.setAdditionalInstanceField(activity,
+        XposedHelpers.setAdditionalInstanceField(context,
                 FIELD_PUDDING_LAYOUT, puddingLayout);
         return puddingLayout;
     }
 
-    private static PuddingLayout generatePudding(final Activity activity,
+    private static PuddingLayout generatePudding(final Context context,
                                                  Pudding.Settings settings) {
-        PuddingLayout puddingLayout = new PuddingLayout(activity);
+        PuddingLayout puddingLayout = new PuddingLayout(context);
         puddingLayout.setLayoutParams(
                 new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
 
         ActionInfo top = new ActionInfo(settings.actions.top);
-        puddingLayout.setTopDrawable(top.newIconDrawable(activity));
+        puddingLayout.setTopDrawable(top.newIconDrawable(context));
         ActionInfo bottom = new ActionInfo(settings.actions.bottom);
-        puddingLayout.setBottomDrawable(bottom.newIconDrawable(activity));
+        puddingLayout.setBottomDrawable(bottom.newIconDrawable(context));
         ActionInfo left = new ActionInfo(settings.actions.left);
-        puddingLayout.setLeftDrawable(left.newIconDrawable(activity));
+        puddingLayout.setLeftDrawable(left.newIconDrawable(context));
         ActionInfo right = new ActionInfo(settings.actions.right);
-        puddingLayout.setRightDrawable(right.newIconDrawable(activity));
+        puddingLayout.setRightDrawable(right.newIconDrawable(context));
 
         puddingLayout.setOnOverscrollListener(new PuddingLayout.OnOverscrollListener() {
             @Override
             public void onOverscrollTop() {
-                Pudding.Settings settings = getSettings(activity);
-                new ActionInfo(settings.actions.top).launch(activity);
+                Pudding.Settings settings = getSettings(context);
+                new ActionInfo(settings.actions.top).launch(context);
             }
 
             @Override
             public void onOverscrollBottom() {
-                Pudding.Settings settings = getSettings(activity);
-                new ActionInfo(settings.actions.bottom).launch(activity);
+                Pudding.Settings settings = getSettings(context);
+                new ActionInfo(settings.actions.bottom).launch(context);
             }
 
             @Override
             public void onOverscrollLeft() {
-                Pudding.Settings settings = getSettings(activity);
-                new ActionInfo(settings.actions.left).launch(activity);
+                Pudding.Settings settings = getSettings(context);
+                new ActionInfo(settings.actions.left).launch(context);
             }
 
             @Override
             public void onOverscrollRight() {
-                Pudding.Settings settings = getSettings(activity);
-                new ActionInfo(settings.actions.right).launch(activity);
+                Pudding.Settings settings = getSettings(context);
+                new ActionInfo(settings.actions.right).launch(context);
             }
         });
 
