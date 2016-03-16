@@ -628,13 +628,15 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
         int count = target.getChildCount();
         for (int i = 0; i < count; ++i) {
             View child = target.getChildAt(i);
-            if (ViewCompat.canScrollVertically(child, direction)) {
+            if (child.getVisibility() == VISIBLE
+                    && ViewCompat.canScrollVertically(child, direction)) {
                 return true;
             }
         }
         for (int i = 0; i < count; ++i) {
             View child = target.getChildAt(i);
-            if (child instanceof ViewGroup) {
+            if (child.getVisibility() == VISIBLE
+                    && child instanceof ViewGroup) {
                 if (canScrollVertically((ViewGroup) child, direction)) {
                     return true;
                 }
@@ -663,13 +665,15 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
         int count = target.getChildCount();
         for (int i = 0; i < count; ++i) {
             View child = target.getChildAt(i);
-            if (ViewCompat.canScrollHorizontally(child, direction)) {
+            if (child.getVisibility() == VISIBLE
+                    && ViewCompat.canScrollHorizontally(child, direction)) {
                 return true;
             }
         }
         for (int i = 0; i < count; ++i) {
             View child = target.getChildAt(i);
-            if (child instanceof ViewGroup) {
+            if (child.getVisibility() == VISIBLE
+                    && child instanceof ViewGroup) {
                 if (canScrollHorizontally((ViewGroup) child, direction)) {
                     return true;
                 }
