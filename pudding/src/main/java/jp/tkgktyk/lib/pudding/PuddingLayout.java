@@ -28,6 +28,7 @@ import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -1318,5 +1319,9 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
         void onOverscrollLeft();
 
         void onOverscrollRight();
+    }
+
+    public void performHapticFeedback() {
+        mCircleView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 }

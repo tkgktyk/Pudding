@@ -25,6 +25,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.common.base.Objects;
+
 import java.io.File;
 
 import de.robv.android.xposed.XC_MethodHook;
@@ -66,7 +68,8 @@ public class ModPudding extends XposedModule {
                                         mPrefs;
                                 Pudding.Settings settings = new Pudding.Settings(mPrefs, forActions);
                                 if (!settings.blacklist.contains(activity.getPackageName())
-                                        && !activity.isChild()) {
+                                        && !activity.isChild()
+                                        && !isIgnoredByWorkaround1(settings, activity)) {
                                     XposedHelpers.setAdditionalInstanceField(activity,
                                             FIELD_SETTINGS, settings);
 //                                    if (settings != null) {
@@ -83,6 +86,11 @@ public class ModPudding extends XposedModule {
                             } catch (Throwable t) {
                                 logE(t);
                             }
+                        }
+
+                        boolean isIgnoredByWorkaround1(Pudding.Settings settings, Activity activity) {
+                            return settings.workaround1
+                                    && Objects.equal(activity.getClass().getName(), "com.android.systemui.recents.RecentsActivity");
                         }
 //
 //                        void install(Activity activity, View content, ViewGroup parent,
@@ -501,7 +509,7 @@ public class ModPudding extends XposedModule {
 
     private static PuddingLayout generatePudding(final Context context,
                                                  Pudding.Settings settings) {
-        PuddingLayout puddingLayout = new PuddingLayout(context);
+        final PuddingLayout puddingLayout = new PuddingLayout(context);
         puddingLayout.setLayoutParams(
                 new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -520,24 +528,36 @@ public class ModPudding extends XposedModule {
             @Override
             public void onOverscrollTop() {
                 Pudding.Settings settings = getSettings(context);
+                if (settings.vibrate) {
+                    puddingLayout.performHapticFeedback();
+                }
                 new ActionInfo(settings.actions.top).launch(context);
             }
 
             @Override
             public void onOverscrollBottom() {
                 Pudding.Settings settings = getSettings(context);
+                if (settings.vibrate) {
+                    puddingLayout.performHapticFeedback();
+                }
                 new ActionInfo(settings.actions.bottom).launch(context);
             }
 
             @Override
             public void onOverscrollLeft() {
                 Pudding.Settings settings = getSettings(context);
+                if (settings.vibrate) {
+                    puddingLayout.performHapticFeedback();
+                }
                 new ActionInfo(settings.actions.left).launch(context);
             }
 
             @Override
             public void onOverscrollRight() {
                 Pudding.Settings settings = getSettings(context);
+                if (settings.vibrate) {
+                    puddingLayout.performHapticFeedback();
+                }
                 new ActionInfo(settings.actions.right).launch(context);
             }
         });

@@ -2,11 +2,18 @@
 
     <Preference
         android:key="@string/key_blacklist"
+        android:summary="@string/pref_summary_blacklist"
         android:title="@string/pref_title_blacklist" />
 
     <SwitchPreference
         android:defaultValue="true"
         android:key="@string/key_vibrate"
         android:title="@string/pref_title_vibrate" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/key_workaround1"
+        android:summary="@string/pref_summary_workaround1"
+        android:title="@string/pref_title_workaround1" />
 
 </PreferenceScreen>

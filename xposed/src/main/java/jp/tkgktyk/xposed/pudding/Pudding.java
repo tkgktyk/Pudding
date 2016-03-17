@@ -182,7 +182,8 @@ public class Pudding {
 
         // General
         public final Set<String> blacklist;
-        public final boolean vibration;
+        public final boolean vibrate;
+        public final boolean workaround1;
 
         // Overscroll Action
         public final Actions actions;
@@ -196,7 +197,8 @@ public class Pudding {
             // General
             // Detector
             blacklist = prefs.getStringSet("key_blacklist", Sets.<String>newHashSet());
-            vibration = prefs.getBoolean("key_vibration", true);
+            vibrate = prefs.getBoolean("key_vibration", true);
+            workaround1 = prefs.getBoolean("key_workaround1", true);
 
             // Overscroll Action
             actions = new Actions(actionPrefs);
