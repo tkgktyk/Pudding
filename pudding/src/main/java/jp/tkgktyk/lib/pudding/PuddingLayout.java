@@ -998,31 +998,35 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
         if (overscroll > mTotalDragDistance) {
             setRefreshing(true, true /* notify */);
         } else {
-            // cancel refresh
-            mRefreshing = false;
-            AnimationListener listener = null;
-            if (!mScale) {
-                listener = new AnimationListener() {
-
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        if (!mScale) {
-                            startScaleDownAnimation(null);
-                        }
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-                    }
-
-                };
-            }
-            animateOffsetToStartPosition(mCurrentTargetOffset, listener);
+            cancelSpinner();
         }
+    }
+
+    private void cancelSpinner() {
+        // cancel refresh
+        mRefreshing = false;
+        AnimationListener listener = null;
+        if (!mScale) {
+            listener = new AnimationListener() {
+
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    if (!mScale) {
+                        startScaleDownAnimation(null);
+                    }
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+
+            };
+        }
+        animateOffsetToStartPosition(mCurrentTargetOffset, listener);
     }
 
     @Override
@@ -1131,6 +1135,7 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                 return false;
             }
             case MotionEvent.ACTION_CANCEL:
+                cancelSpinner();
                 return false;
         }
 
