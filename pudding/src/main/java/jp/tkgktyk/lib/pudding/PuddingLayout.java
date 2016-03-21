@@ -147,6 +147,11 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
     private Drawable mLeftDrawable;
     private Drawable mRightDrawable;
 
+    private boolean mCanScrollUp;
+    private boolean mCanScrollDown;
+    private boolean mCanScrollLeft;
+    private boolean mCanScrollRight;
+
     private TargetOffsetSetter mTargetOffsetSetter;
 
     private Animation mScaleAnimation;
@@ -613,7 +618,7 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
      * @return Whether it is possible for the child view of this layout to
      * scroll up. Override this if the child view is a custom view.
      */
-    public boolean canChildScrollUp() {
+    public boolean canChildrenScrollUp() {
         return canScrollVertically(this, -1);
     }
 
@@ -621,7 +626,7 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
      * @return Whether it is possible for the child view of this layout to
      * scroll down. Override this if the child view is a custom view.
      */
-    public boolean canChildScrollDown() {
+    public boolean canChildrenScrollDown() {
         return canScrollVertically(this, 1);
     }
 
@@ -650,7 +655,7 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
      * @return Whether it is possible for the child view of this layout to
      * scroll left. Override this if the child view is a custom view.
      */
-    public boolean canChildScrollLeft() {
+    public boolean canChildrenScrollLeft() {
         return canScrollHorizontally(this, -1);
     }
 
@@ -658,7 +663,7 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
      * @return Whether it is possible for the child view of this layout to
      * scroll right. Override this if the child view is a custom view.
      */
-    public boolean canChildScrollRight() {
+    public boolean canChildrenScrollRight() {
         return canScrollHorizontally(this, 1);
     }
 
@@ -712,6 +717,10 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                 }
                 mInitialDownX = MotionEventCompat.getX(ev, index);
                 mInitialDownY = MotionEventCompat.getY(ev, index);
+                mCanScrollUp = canChildrenScrollUp();
+                mCanScrollDown = canChildrenScrollDown();
+                mCanScrollLeft = canChildrenScrollLeft();
+                mCanScrollRight = canChildrenScrollRight();
                 break;
             }
 
@@ -732,7 +741,7 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                     final float yDiff = y - mInitialDownY;
                     // give priority to vertical swipe
                     if (yDiff > mTouchSlop) {
-                        if (!canChildScrollUp() && mTopDrawable != null) {
+                        if (!mCanScrollUp && mTopDrawable != null) {
                             mCircleView.setImageDrawable(mTopDrawable);
                             mTargetOffsetSetter = mTargetOffsetTopSetter;
                             mTargetOffsetSetter.set(mOriginalOffset - mTargetOffsetSetter.calculateCurrentOffset(), true);
@@ -743,7 +752,7 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                             requestDisallowInterceptTouchEvent(true);
                         }
                     } else if (-yDiff > mTouchSlop) {
-                        if (!canChildScrollDown() && mBottomDrawable != null) {
+                        if (!mCanScrollDown && mBottomDrawable != null) {
                             mCircleView.setImageDrawable(mBottomDrawable);
                             mTargetOffsetSetter = mTargetOffsetBottomSetter;
                             mTargetOffsetSetter.set(mOriginalOffset - mTargetOffsetSetter.calculateCurrentOffset(), true);
@@ -754,7 +763,7 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                             requestDisallowInterceptTouchEvent(true);
                         }
                     } else if (xDiff > mTouchSlop) {
-                        if (!canChildScrollLeft() && mLeftDrawable != null) {
+                        if (!mCanScrollLeft && mLeftDrawable != null) {
                             mCircleView.setImageDrawable(mLeftDrawable);
                             mTargetOffsetSetter = mTargetOffsetLeftSetter;
                             mTargetOffsetSetter.set(mOriginalOffset - mTargetOffsetSetter.calculateCurrentOffset(), true);
@@ -765,7 +774,7 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                             requestDisallowInterceptTouchEvent(true);
                         }
                     } else if (-xDiff > mTouchSlop) {
-                        if (!canChildScrollRight() && mRightDrawable != null) {
+                        if (!mCanScrollRight && mRightDrawable != null) {
                             mCircleView.setImageDrawable(mRightDrawable);
                             mTargetOffsetSetter = mTargetOffsetRightSetter;
                             mTargetOffsetSetter.set(mOriginalOffset - mTargetOffsetSetter.calculateCurrentOffset(), true);
