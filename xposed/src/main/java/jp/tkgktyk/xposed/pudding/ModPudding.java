@@ -67,8 +67,9 @@ public class ModPudding extends XposedModule {
                                         Pudding.getSharedPreferences(activity, packageName) :
                                         mPrefs;
                                 Pudding.Settings settings = new Pudding.Settings(mPrefs, forActions);
-                                if (!settings.blacklist.contains(activity.getPackageName())
-                                        && !activity.isChild()
+                                final boolean contain = settings.blacklist.contains(activity.getPackageName());
+                                final boolean white = settings.whitelistMode ? contain : !contain;
+                                if (white && !activity.isChild()
                                         && !isIgnoredByWorkaround1(settings, activity)) {
                                     XposedHelpers.setAdditionalInstanceField(activity,
                                             FIELD_SETTINGS, settings);

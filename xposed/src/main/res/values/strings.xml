@@ -41,9 +41,15 @@
     <!-- Strings related to Settings -->
     <string name="saved">Saved</string>
 
+    <!-- Warning -->
+    <string name="pref_title_warning">Warning</string>
+    <string name="pref_summary_warning">Stop app process for changes to take effect</string>
+
     <!-- General settings -->
     <string name="pref_header_general">General</string>
 
+    <string name="pref_title_whitelist_mode">Whitelist</string>
+    <string name="pref_summary_whitelist_mode">Treat blacklist as whitelist</string>
     <string name="pref_title_blacklist">Blacklist</string>
     <string name="pref_summary_blacklist">Ignore specified apps</string>
 

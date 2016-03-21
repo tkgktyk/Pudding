@@ -1,5 +1,11 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/key_whitelist_mode"
+        android:summary="@string/pref_summary_whitelist_mode"
+        android:title="@string/pref_title_whitelist_mode" />
+
     <Preference
         android:key="@string/key_blacklist"
         android:summary="@string/pref_summary_blacklist"

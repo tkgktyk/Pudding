@@ -181,6 +181,7 @@ public class Pudding {
         static final long serialVersionUID = 1L;
 
         // General
+        public final boolean whitelistMode;
         public final Set<String> blacklist;
         public final boolean vibrate;
         public final boolean workaround1;
@@ -196,6 +197,7 @@ public class Pudding {
 
             // General
             // Detector
+            whitelistMode = prefs.getBoolean("key_whitelist_mode", false);
             blacklist = prefs.getStringSet("key_blacklist", Sets.<String>newHashSet());
             vibrate = prefs.getBoolean("key_vibration", true);
             workaround1 = prefs.getBoolean("key_workaround1", true);
