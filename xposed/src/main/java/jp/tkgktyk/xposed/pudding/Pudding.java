@@ -184,6 +184,7 @@ public class Pudding {
         public final boolean whitelistMode;
         public final Set<String> blacklist;
         public final boolean vibrate;
+        public final boolean marginForDrawer;
         public final boolean workaround1;
 
         // Overscroll Action
@@ -200,6 +201,7 @@ public class Pudding {
             whitelistMode = prefs.getBoolean("key_whitelist_mode", false);
             blacklist = prefs.getStringSet("key_blacklist", Sets.<String>newHashSet());
             vibrate = prefs.getBoolean("key_vibration", true);
+            marginForDrawer = prefs.getBoolean("key_margin_for_drawer", true);
             workaround1 = prefs.getBoolean("key_workaround1", true);
 
             // Overscroll Action

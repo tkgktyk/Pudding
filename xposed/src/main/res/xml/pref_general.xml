@@ -18,6 +18,12 @@
 
     <SwitchPreference
         android:defaultValue="true"
+        android:key="@string/key_margin_for_drawer"
+        android:summary="@string/pref_summary_margin_for_drawer"
+        android:title="@string/pref_title_margin_for_drawer" />
+
+    <SwitchPreference
+        android:defaultValue="true"
         android:key="@string/key_workaround1"
         android:summary="@string/pref_summary_workaround1"
         android:title="@string/pref_title_workaround1" />

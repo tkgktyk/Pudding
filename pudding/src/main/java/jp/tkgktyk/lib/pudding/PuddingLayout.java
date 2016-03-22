@@ -168,6 +168,10 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
 
     private int mCircleHeight;
 
+    private boolean mUseMarginForDrawer;
+    private int mMarginForDrawer;
+    private boolean mIntercept;
+
     /* remove custom starting position */
     // Whether the client has set a custom starting position;
 //    private boolean mUsingCustomStart;
@@ -312,6 +316,10 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
         mExternalTarget = target;
     }
 
+    public void useMarginForDrawer(boolean use) {
+        mUseMarginForDrawer = use;
+    }
+
     /**
      * Simple constructor to use when creating a SwipeRefreshLayout from code.
      *
@@ -356,6 +364,8 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
 //
 //        mNestedScrollingChildHelper = new NestedScrollingChildHelper(this);
 //        setNestedScrollingEnabled(true);
+
+        mMarginForDrawer = (int) (20 * metrics.density + 0.5f);
     }
 
     protected int getChildDrawingOrder(int childCount, int i) {
@@ -707,8 +717,6 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
 
         switch (action) {
             case MotionEvent.ACTION_DOWN: {
-//                setTargetOffsetTopAndBottom(mOriginalOffset - mCircleView.getTop(), true);
-//                setTargetOffsetLeftAndRight(mOriginalOffsetLeft - mCircleView.getLeft(), true);
                 mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
                 mIsBeingDragged = false;
                 final int index = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
@@ -721,10 +729,17 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                 mCanScrollDown = canChildrenScrollDown();
                 mCanScrollLeft = canChildrenScrollLeft();
                 mCanScrollRight = canChildrenScrollRight();
+
+                mIntercept = (!mUseMarginForDrawer || (mInitialDownX > mMarginForDrawer && mInitialDownX < (getWidth() - mMarginForDrawer)))
+                        && (mCanScrollUp || mCanScrollDown || mCanScrollLeft || mCanScrollRight);
                 break;
             }
 
             case MotionEvent.ACTION_MOVE:
+                if (!mIntercept) {
+                    return false;
+                }
+
                 if (mActivePointerId == INVALID_POINTER) {
                     Log.e(LOG_TAG, "Got ACTION_MOVE event but don't have an active pointer id.");
                     return false;
@@ -801,6 +816,27 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
 
         return mIsBeingDragged;
     }
+
+//    private void onActionDown(MotionEvent ev) {
+//        if (mActivePointerId != INVALID_POINTER) {
+//            return;
+//        }
+//        mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+//        mIsBeingDragged = false;
+//        final int index = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+//        if (index < 0) {
+//            return;
+//        }
+//        mInitialDownX = MotionEventCompat.getX(ev, index);
+//        mInitialDownY = MotionEventCompat.getY(ev, index);
+//        mCanScrollUp = canChildrenScrollUp();
+//        mCanScrollDown = canChildrenScrollDown();
+//        mCanScrollLeft = canChildrenScrollLeft();
+//        mCanScrollRight = canChildrenScrollRight();
+//
+//        mIntercept = (!mUseMarginForDrawer || (mInitialDownX > mMarginForDrawer && mInitialDownX < (getWidth() - mMarginForDrawer)))
+//                && (mCanScrollUp || mCanScrollDown || mCanScrollLeft || mCanScrollRight);
+//    }
 
     /* removed nested scroll support */
 //    @Override
@@ -1055,11 +1091,14 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
-                mIsBeingDragged = false;
+//                onActionDown(ev);
                 break;
 
             case MotionEvent.ACTION_MOVE: {
+                if (!mIntercept) {
+                    return false;
+                }
+
                 int pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
                 if (pointerIndex < 0) {
                     Log.e(LOG_TAG, "Got ACTION_MOVE event but have an invalid active pointer id.");
@@ -1119,9 +1158,18 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                 break;
 
             case MotionEvent.ACTION_UP: {
+                mIsBeingDragged = false;
+                if (!mIntercept) {
+                    cancelSpinner();
+                    mActivePointerId = INVALID_POINTER;
+                    return false;
+                }
+
                 int pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
                 if (pointerIndex < 0) {
                     Log.e(LOG_TAG, "Got ACTION_UP event but don't have an active pointer id.");
+                    cancelSpinner();
+                    mActivePointerId = INVALID_POINTER;
                     return false;
                 }
 
@@ -1129,7 +1177,6 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
                 final float overscrollLeft = (x - mInitialMotionX) * DRAG_RATE;
                 final float overscrollTop = (y - mInitialMotionY) * DRAG_RATE;
-                mIsBeingDragged = false;
                 switch (mDirection) {
                     case DIRECTION_TOP:
                     case DIRECTION_BOTTOM:
@@ -1144,7 +1191,9 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                 return false;
             }
             case MotionEvent.ACTION_CANCEL:
+                mIsBeingDragged = false;
                 cancelSpinner();
+                mActivePointerId = INVALID_POINTER;
                 return false;
         }
 

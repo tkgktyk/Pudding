@@ -497,7 +497,7 @@ public class ModPudding extends XposedModule {
 
     private static PuddingLayout install(Context context, View content,
                                          Pudding.Settings settings, ViewGroup.LayoutParams lp) {
-        PuddingLayout puddingLayout = generatePudding(context, settings);
+        PuddingLayout puddingLayout = generatePudding(context, settings, lp);
         if (lp != null) {
             puddingLayout.addView(content, lp);
         } else {
@@ -509,12 +509,14 @@ public class ModPudding extends XposedModule {
     }
 
     private static PuddingLayout generatePudding(final Context context,
-                                                 Pudding.Settings settings) {
+                                                 Pudding.Settings settings, ViewGroup.LayoutParams lp) {
         final PuddingLayout puddingLayout = new PuddingLayout(context);
-        puddingLayout.setLayoutParams(
+        puddingLayout.setLayoutParams(lp != null ? lp :
                 new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
+
+        puddingLayout.useMarginForDrawer(settings.marginForDrawer);
 
         ActionInfo top = new ActionInfo(settings.actions.top);
         puddingLayout.setTopDrawable(top.newIconDrawable(context));
