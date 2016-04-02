@@ -172,6 +172,8 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
     private int mMarginForDrawer;
     private boolean mIntercept;
 
+    private boolean mCancelByMultiTouch;
+
     /* remove custom starting position */
     // Whether the client has set a custom starting position;
 //    private boolean mUsingCustomStart;
@@ -318,6 +320,10 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
 
     public void useMarginForDrawer(boolean use) {
         mUseMarginForDrawer = use;
+    }
+
+    public void setCancelByMultiTouch(boolean cancel) {
+        mCancelByMultiTouch = cancel;
     }
 
     /**
@@ -803,6 +809,14 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                 }
                 break;
 
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (!mIsBeingDragged && mCancelByMultiTouch) {
+                    mReturningToStart = true;
+                    cancelSpinner();
+                    mActivePointerId = INVALID_POINTER;
+                }
+                break;
+
             case MotionEventCompat.ACTION_POINTER_UP:
                 onSecondaryPointerUp(ev);
                 break;
@@ -1144,12 +1158,18 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
                 break;
             }
             case MotionEventCompat.ACTION_POINTER_DOWN: {
-                int pointerIndex = MotionEventCompat.getActionIndex(ev);
-                if (pointerIndex < 0) {
-                    Log.e(LOG_TAG, "Got ACTION_POINTER_DOWN event but have an invalid action index.");
-                    return false;
+                if (!mIsBeingDragged && mCancelByMultiTouch) {
+                    mReturningToStart = true;
+                    cancelSpinner();
+                    mActivePointerId = INVALID_POINTER;
+                } else {
+                    int pointerIndex = MotionEventCompat.getActionIndex(ev);
+                    if (pointerIndex < 0) {
+                        Log.e(LOG_TAG, "Got ACTION_POINTER_DOWN event but have an invalid action index.");
+                        return false;
+                    }
+                    mActivePointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
                 }
-                mActivePointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
                 break;
             }
 
@@ -1360,6 +1380,9 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
     };
 
     private void onSecondaryPointerUp(MotionEvent ev) {
+        if (!mIsBeingDragged && mCancelByMultiTouch) {
+            return;
+        }
         final int pointerIndex = MotionEventCompat.getActionIndex(ev);
         final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
         if (pointerId == mActivePointerId) {

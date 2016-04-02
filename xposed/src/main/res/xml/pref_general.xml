@@ -24,6 +24,12 @@
 
     <SwitchPreference
         android:defaultValue="true"
+        android:key="@string/key_single_touch"
+        android:summary="@string/pref_summary_single_touch"
+        android:title="@string/pref_title_single_touch" />
+
+    <SwitchPreference
+        android:defaultValue="true"
         android:key="@string/key_workaround1"
         android:summary="@string/pref_summary_workaround1"
         android:title="@string/pref_title_workaround1" />

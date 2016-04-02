@@ -5,5 +5,6 @@
     <string name="key_blacklist" translatable="false">key_blacklist</string>
     <string name="key_vibrate" translatable="false">key_vibration</string>
     <string name="key_margin_for_drawer" translatable="false">key_margin_for_drawer</string>
+    <string name="key_single_touch" translatable="false">key_single_touch</string>
     <string name="key_workaround1" translatable="false">key_workaround1</string>
 </resources>
