@@ -111,6 +111,7 @@ public class ModPudding extends XposedModule {
                         @Override
                         protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                             try {
+//                                logD("setContentView");
                                 Context context = (Context) XposedHelpers.callMethod(methodHookParam.thisObject, "getContext");
                                 Pudding.Settings settings = getSettings(context);
                                 if (settings == null) {
@@ -133,6 +134,7 @@ public class ModPudding extends XposedModule {
                         @Override
                         protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                             try {
+//                                logD("setContentView");
                                 Context context = (Context) XposedHelpers.callMethod(methodHookParam.thisObject, "getContext");
                                 Pudding.Settings settings = getSettings(context);
                                 if (settings == null) {
@@ -154,6 +156,7 @@ public class ModPudding extends XposedModule {
                         @Override
                         protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                             try {
+//                                logD("setContentView");
                                 Context context = (Context) XposedHelpers.callMethod(methodHookParam.thisObject, "getContext");
                                 View content = (View) methodHookParam.args[0];
                                 if (content instanceof PuddingLayout) {
@@ -181,6 +184,7 @@ public class ModPudding extends XposedModule {
                         @Override
                         protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                             try {
+//                                logD("addContentView");
                                 Context context = (Context) XposedHelpers.callMethod(methodHookParam.thisObject, "getContext");
                                 Pudding.Settings settings = getSettings(context);
                                 if (settings == null) {

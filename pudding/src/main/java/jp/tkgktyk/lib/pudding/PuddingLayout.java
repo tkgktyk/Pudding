@@ -1269,11 +1269,13 @@ public class PuddingLayout extends ViewGroup implements NestedScrollingParent,
     };
 
     private void moveToStart(float interpolatedTime) {
-        int targetTop = 0;
-        int offset = 0;
-        targetTop = (mFrom + (int) ((mOriginalOffset - mFrom) * interpolatedTime));
-        offset = targetTop - mTargetOffsetSetter.calculateCurrentOffset();
-        mTargetOffsetSetter.set(offset, false /* requires update */);
+        if (mTargetOffsetSetter != null) {
+            int targetTop = 0;
+            int offset = 0;
+            targetTop = (mFrom + (int) ((mOriginalOffset - mFrom) * interpolatedTime));
+            offset = targetTop - mTargetOffsetSetter.calculateCurrentOffset();
+            mTargetOffsetSetter.set(offset, false /* requires update */);
+        }
     }
 
     private final Animation mAnimateToStartPosition = new Animation() {
