@@ -38,6 +38,8 @@ import jp.tkgktyk.xposed.pudding.app.util.ActionInfo;
 
 /**
  * Created by tkgktyk on 2015/02/13.
+ *
+ * TODO: Bother user interface when DialogFragment appear.
  */
 public class ModPudding extends XposedModule {
     private static final String CLASS_PHONE_WINDOW = "com.android.internal.policy.impl.PhoneWindow";
@@ -119,7 +121,7 @@ public class ModPudding extends XposedModule {
                                 } else {
                                     int layoutRes = (Integer) methodHookParam.args[0];
                                     View content = LayoutInflater.from(context).inflate(layoutRes, null);
-                                    View pudding = install(context, content, settings, null);
+                                    View pudding = install(context, content, settings, content.getLayoutParams());
                                     XposedHelpers.callMethod(methodHookParam.thisObject, "setContentView", pudding, pudding.getLayoutParams());
                                 }
                             } catch (Throwable t) {
@@ -141,7 +143,7 @@ public class ModPudding extends XposedModule {
                                     invokeOriginalMethod(methodHookParam);
                                 } else {
                                     View content = (View) methodHookParam.args[0];
-                                    View pudding = install(context, content, settings, null);
+                                    View pudding = install(context, content, settings, content.getLayoutParams());
                                     XposedHelpers.callMethod(methodHookParam.thisObject, "setContentView", pudding, pudding.getLayoutParams());
                                 }
                             } catch (Throwable t) {
@@ -238,8 +240,8 @@ public class ModPudding extends XposedModule {
         final PuddingLayout puddingLayout = new PuddingLayout(context);
         puddingLayout.setLayoutParams(lp != null ? lp :
                 new ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT));
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
 
         puddingLayout.useMarginForDrawer(settings.marginForDrawer);
         puddingLayout.setCancelByMultiTouch(settings.singleTouch);
